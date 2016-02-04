@@ -61,6 +61,8 @@ public class BrowserView {
     private Button myBackButton;
     private Button myNextButton;
     private Button myHomeButton;
+	private Button myFavButton;
+
     // favorites
     private ComboBox<String> myFavorites;
     // get strings from resource file
@@ -76,6 +78,7 @@ public class BrowserView {
         // use resources for labels
         myResources = ResourceBundle.getBundle(DEFAULT_RESOURCE_PACKAGE + language);
         BorderPane root = new BorderPane();
+        
         // must be first since other panels may refer to page
         root.setCenter(makePageDisplay());
         root.setTop(makeInputPanel());
@@ -84,19 +87,18 @@ public class BrowserView {
         enableButtons();
         // create scene to hold UI
         myScene = new Scene(root, DEFAULT_SIZE.width, DEFAULT_SIZE.height);
-        //myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
+        myScene.getStylesheets().add(DEFAULT_RESOURCE_PACKAGE + STYLESHEET);
     }
 
     /**
      * Display given URL.
      */
     public void showPage (String url) {
-        URL valid = myModel.go(url);
-        if (valid != null) {
-            update(valid);
-        }
-        else {
-            showError("Could not load " + url);
+        try{
+    	URL valid = myModel.go(url);
+        }catch (BrowserException e){
+       
+            showError(e.getMessage());
         }
     }
 
@@ -164,6 +166,7 @@ public class BrowserView {
         if (response.isPresent()) {
             myModel.addFavorite(response.get());
             myFavorites.getItems().add(response.get());
+            System.out.println("TESTER");
         }
     }
 
@@ -218,6 +221,11 @@ public class BrowserView {
         result.getChildren().add(makeButton("GoCommand", showHandler));
         myURLDisplay = makeInputField(40, showHandler);
         result.getChildren().add(myURLDisplay);
+
+        myFavButton = makeButton("AddFavoriteCommand", event -> addFavorite());
+        result.getChildren().add(myFavButton);
+        
+        
         return result;
     }
 
@@ -230,6 +238,22 @@ public class BrowserView {
             myModel.setHome();
             enableButtons();
         }));
+        
+        myFavorites.valueProperty().addListener(new ChangeListener<String>(){
+        	@Override
+        	public void changed(ObservableValue ov, String t, String t1){
+        		System.out.println(t1);
+        	}
+        });
+        
+        /*
+        myFavorites.setOnAction(e -> {
+        	this.showFavorite(myFavorites.getSelectionModel().getSelectedItem());
+        	System.out.println(myFavorites.getSelectionModel().getSelectedItem());
+        });*/
+        
+        result.getChildren().add(myFavorites);
+        
         return result;
     }
 

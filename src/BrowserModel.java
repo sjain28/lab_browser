@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 
 /**
@@ -21,6 +22,10 @@ public class BrowserModel {
     private int myCurrentIndex;
     private List<URL> myHistory;
     private Map<String, URL> myFavorites;
+    
+    public static final String DEFAULT_RESOURCE_PACKAGE = "resources/ErrorMessages";
+    private ResourceBundle myResources = ResourceBundle.getBundle(DEFAULT_RESOURCE_PACKAGE);
+
 
 
     /**
@@ -41,19 +46,25 @@ public class BrowserModel {
         if (hasNext()) {
             myCurrentIndex++;
             return myHistory.get(myCurrentIndex);
+        }else{
+        	throw new BrowserException(myResources.getString("NextException"));
         }
-        return null;
     }
 
     /**
      * Returns the first page in back history, null if back history is empty.
      */
     public URL back () {
+    	
         if (hasPrevious()) {
             myCurrentIndex--;
             return myHistory.get(myCurrentIndex);
+        }else{
+        	throw new BrowserException(myResources.getString("BackException"));
         }
-        return null;
+        
+
+        
     }
 
     /**
@@ -75,8 +86,9 @@ public class BrowserModel {
             }
             return myCurrentURL;
         }
-        catch (Exception e) {
-            return null;
+        catch (Exception e){
+        	throw new BrowserException(myResources.getString("GoException") + url);
+            
         }
     }
 
@@ -127,8 +139,9 @@ public class BrowserModel {
     public URL getFavorite (String name) {
         if (name != null && !name.equals("") && myFavorites.containsKey(name)) {
             return myFavorites.get(name);
+        }else{
+        	throw new BrowserException(myResources.getString("FavoriteException"));
         }
-        return null;
     }
 
     // deal with a potentially incomplete URL
@@ -146,7 +159,7 @@ public class BrowserModel {
                     // e.g., let user leave off initial protocol
                     return new URL(PROTOCOL_PREFIX + possible);
                 } catch (MalformedURLException eee) {
-                    return null;
+                    throw new BrowserException(myResources.getString("CompleteException"));
                 }
             }
         }
